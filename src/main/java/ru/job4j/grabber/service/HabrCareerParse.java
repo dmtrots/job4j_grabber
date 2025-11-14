@@ -36,10 +36,13 @@ public class HabrCareerParse implements Parse {
                     String datetime = datetimeElement.attr("datetime");
                     Long dateMillis = java.time.OffsetDateTime.parse(datetime)
                             .toInstant().toEpochMilli();
+
+                    String description = retrieveDescription(link);
                     var post = new Post();
                     post.setTitle(vacancyName);
                     post.setLink(link);
                     post.setTime(dateMillis);
+                    post.setDescription(description);
                     result.add(post);
                 });
             }
@@ -49,6 +52,20 @@ public class HabrCareerParse implements Parse {
         return result;
     }
 
+    private String retrieveDescription(String link) {
+        try {
+            var document = Jsoup.connect(link).get();
+            var descriptionElement = document.select(".vacancy-description__text").first();
+
+            if (descriptionElement != null) {
+                return descriptionElement.text();
+            }
+        } catch (IOException e) {
+            log.error("Error retrieving description from: " + link, e);
+        }
+        return "";
+    }
+
     public static void main(String[] args) {
         HabrCareerParse parser = new HabrCareerParse();
         List<Post> posts = parser.fetch();
@@ -56,6 +73,7 @@ public class HabrCareerParse implements Parse {
         for (Post post : posts) {
             System.out.println("Title: " + post.getTitle());
             System.out.println("Link: " + post.getLink());
+            System.out.println("Description: " + post.getDescription());
             var instant = java.time.Instant.ofEpochMilli(post.getTime());
             var dateTime = java.time.ZonedDateTime.ofInstant(instant, java.time.ZoneId.systemDefault());
             System.out.println("Time: " + dateTime.format(
