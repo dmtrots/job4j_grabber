@@ -4,23 +4,29 @@ import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import ru.job4j.grabber.model.Post;
 import ru.job4j.grabber.utils.DateTimeParser;
+import ru.job4j.grabber.utils.HabrCareerDateTimeParser;
 
 import java.io.IOException;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HabrCareerParse implements Parse {
+public class HabrCareerParse implements ru.job4j.grabber.Parse {
     private static final Logger LOG = Logger.getLogger(HabrCareerParse.class);
     private static final String SOURCE_LINK = "https://career.habr.com";
     private static final String PREFIX = "/vacancies?page=";
     private static final String SUFFIX = "&q=Java%20developer&type=all";
     private static final int PAGES_TO_PARSE = 5;
+    private final DateTimeParser dateTimeParser;
+
+    public HabrCareerParse(DateTimeParser dateTimeParser) {
+        this.dateTimeParser = dateTimeParser;
+    }
 
     @Override
-    public List<Post> fetch() {
+    public List<Post> fetch(String habrLink) {
         var result = new ArrayList<Post>();
         try {
-            //int pageNumber = 1;
             for (int pageNumber = 1; pageNumber <= PAGES_TO_PARSE; pageNumber++) {
                 String fullLink = "%s%s%d%s".formatted(SOURCE_LINK, PREFIX, pageNumber, SUFFIX);
                 var connection = Jsoup.connect(fullLink);
@@ -35,8 +41,7 @@ public class HabrCareerParse implements Parse {
 
                     var datetimeElement = row.select(".vacancy-card__date").first().child(0);
                     String datetime = datetimeElement.attr("datetime");
-                    Long dateMillis = java.time.OffsetDateTime.parse(datetime)
-                            .toInstant().toEpochMilli();
+                    Long dateMillis = dateTimeParser.parse(datetime).toEpochSecond(ZoneOffset.UTC);
 
                     String description = retrieveDescription(link);
                     var post = new Post();
@@ -68,8 +73,8 @@ public class HabrCareerParse implements Parse {
     }
 
     public static void main(String[] args) {
-        HabrCareerParse parser = new HabrCareerParse();
-        List<Post> posts = parser.fetch();
+        HabrCareerParse parser = new HabrCareerParse(new HabrCareerDateTimeParser());
+        List<Post> posts = parser.fetch("https://career.habr.com");
 
         for (Post post : posts) {
             System.out.println("Title: " + post.getTitle());
