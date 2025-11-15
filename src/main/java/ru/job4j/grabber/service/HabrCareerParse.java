@@ -3,13 +3,14 @@ package ru.job4j.grabber.service;
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import ru.job4j.grabber.model.Post;
+import ru.job4j.grabber.utils.DateTimeParser;
+
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 public class HabrCareerParse implements Parse {
-    private static final Logger log = Logger.getLogger(HabrCareerParse.class);
+    private static final Logger LOG = Logger.getLogger(HabrCareerParse.class);
     private static final String SOURCE_LINK = "https://career.habr.com";
     private static final String PREFIX = "/vacancies?page=";
     private static final String SUFFIX = "&q=Java%20developer&type=all";
@@ -47,7 +48,7 @@ public class HabrCareerParse implements Parse {
                 });
             }
         } catch (IOException e) {
-            log.error("When load page", e);
+            LOG.error("When load page", e);
         }
         return result;
     }
@@ -61,7 +62,7 @@ public class HabrCareerParse implements Parse {
                 return descriptionElement.text();
             }
         } catch (IOException e) {
-            log.error("Error retrieving description from: " + link, e);
+            LOG.error("Error retrieving description from: " + link, e);
         }
         return "";
     }
