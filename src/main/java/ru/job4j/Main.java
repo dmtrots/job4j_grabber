@@ -12,7 +12,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class Main {
-    private static final Logger log = Logger.getLogger(Main.class);
+    private static final Logger LOG = Logger.getLogger(Main.class);
 
     public static void main(String[] args) {
         var config = new Config();
@@ -40,9 +40,9 @@ public class Main {
             Thread.sleep(10000);
 
         } catch (SQLException e) {
-            log.error("When create a connection", e);
+            LOG.error("When create a connection", e);
         } catch (InterruptedException e) {
-            log.error("Interrupted exception", e);
+            LOG.error("Interrupted exception", e);
             Thread.currentThread().interrupt();
         }
     }
