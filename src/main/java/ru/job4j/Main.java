@@ -1,49 +1,44 @@
 package ru.job4j;
 
-import org.apache.log4j.Logger;
-import ru.job4j.grabber.model.Post;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.job4j.grabber.service.Config;
 import ru.job4j.grabber.service.SchedulerManager;
 import ru.job4j.grabber.service.SuperJobGrab;
+import ru.job4j.grabber.service.Web;
 import ru.job4j.grabber.stores.JdbcStore;
+import ru.job4j.grabber.stores.Store;
+import ru.job4j.grabber.model.Post;
 
-import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class Main {
-    private static final Logger LOG = Logger.getLogger(Main.class);
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
         var config = new Config();
         config.load("application.properties");
-        try (Connection connection = DriverManager.getConnection(
-                config.get("db.url"),
+        try (var connection = DriverManager.getConnection(config.get("db.url"),
                 config.get("db.username"),
-                config.get("db.password")
-        );
-             var scheduler = new SchedulerManager()) {
-            var store = new JdbcStore(connection);
+                config.get("db.password"))) {
+            Store store = new JdbcStore(connection);
+
             var post = new Post();
             post.setTitle("Super Java Job");
-            post.setDescription("Test description");
-            post.setLink("http://example.com");
-            post.setTime(System.currentTimeMillis());
             store.save(post);
 
+            var scheduler = new SchedulerManager();
             scheduler.init();
             scheduler.load(
                     Integer.parseInt(config.get("rabbit.interval")),
                     SuperJobGrab.class,
-                    store);
+                    store
+            );
 
-            Thread.sleep(10000);
-
+            new Web(store).start(Integer.parseInt(config.get("server.port")));
         } catch (SQLException e) {
-            LOG.error("When create a connection", e);
-        } catch (InterruptedException e) {
-            LOG.error("Interrupted exception", e);
-            Thread.currentThread().interrupt();
+            log.error("When creating a connection", e);
         }
     }
 }

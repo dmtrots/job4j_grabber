@@ -72,7 +72,7 @@ public class HabrCareerParse implements ru.job4j.grabber.Parse {
         return "";
     }
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         HabrCareerParse parser = new HabrCareerParse(new HabrCareerDateTimeParser());
         List<Post> posts = parser.fetch("https://career.habr.com");
 
@@ -86,5 +86,5 @@ public class HabrCareerParse implements ru.job4j.grabber.Parse {
                     java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             System.out.println("-------------------------");
         }
-    }
+    }*/
 }
