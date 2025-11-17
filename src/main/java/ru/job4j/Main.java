@@ -15,7 +15,7 @@ import java.sql.SQLException;
 import java.time.Instant;
 
 public class Main {
-    private static final Logger log = LoggerFactory.getLogger(Main.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
         var config = new Config();
@@ -40,7 +40,7 @@ public class Main {
 
             new Web(store).start(Integer.parseInt(config.get("server.port")));
         } catch (SQLException e) {
-            log.error("When creating a connection", e);
+            LOG.error("When creating a connection", e);
         }
     }
 }
