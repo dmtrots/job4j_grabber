@@ -12,6 +12,7 @@ import ru.job4j.grabber.model.Post;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.time.Instant;
 
 public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
@@ -26,6 +27,7 @@ public class Main {
 
             var post = new Post();
             post.setTitle("Super Java Job");
+            post.setTime(Instant.now().getEpochSecond());
             store.save(post);
 
             var scheduler = new SchedulerManager();
